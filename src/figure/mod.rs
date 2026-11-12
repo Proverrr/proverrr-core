@@ -1,13 +1,12 @@
-use crate::figure::proof::ParallelCondition;
-
+use crate::prove::proof;
 pub mod point;
 pub mod segment;
 pub mod ray;
 pub mod line;
-pub mod proof;
 pub mod object;
 
 pub type ID = u32;
+//Pan-Line: Line, Segment, Ray
 pub trait PanLine{}
 impl PartialEq for dyn PanLine{
     fn eq(&self, other: &dyn PanLine) -> bool{

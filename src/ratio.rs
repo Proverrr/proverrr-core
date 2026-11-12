@@ -7,6 +7,10 @@ pub struct Ratio{
 }
 impl Ratio{
     fn update(&mut self){
+        //Special Case
+        if self.a==0 {
+            return;
+        }
         if self.b<0 {
             self.a = -self.a;
             self.b = -self.b;

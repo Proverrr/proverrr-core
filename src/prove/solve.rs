@@ -1,4 +1,4 @@
-use crate::figure::proof::{Condition, Proof};
+use crate::prove::proof::{Condition, Proof};
 use crate::figure::Figure;
 pub struct Rule{
     //TODO: put here many bools telling which Transfer is enabled
