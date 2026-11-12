@@ -1,30 +1,48 @@
-use std::collections::HashSet;
 use std::ops::Add;
-pub(crate) use crate::prove::condition::Condition;
-use crate::prove::transfer;
+
+use crate::prove::condition::Condition;
 use crate::prove::transfer::TransferType;
 
-#[derive(PartialEq)]
-pub struct Proof{
-    pub conditions: Vec<Box<dyn Condition>>,//Dependencies of this proof
-    pub fathers: Vec<Vec<Box<dyn Condition>>>,//Dependencies of each, to recover the proving process
-    pub describe: Vec<TransferType>//Transfer type of each, to recover the proving process
+// Every step proves conditions[i] from fathers[i] with describe[i].
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct Proof {
+    pub conditions: Vec<Condition>,
+    pub fathers: Vec<Vec<Condition>>,
+    pub describe: Vec<TransferType>,
 }
+
+impl Proof {
+    pub fn new() -> Self {
+        Proof::default()
+    }
+
+    pub fn push_step(
+        &mut self,
+        condition: Condition,
+        fathers: Vec<Condition>,
+        describe: TransferType,
+    ) {
+        if self.conditions.contains(&condition) {
+            return;
+        }
+        self.conditions.push(condition);
+        self.fathers.push(fathers);
+        self.describe.push(describe);
+    }
+}
+
 impl Add for Proof {
     type Output = Proof;
-    fn add(self, other: &Proof) -> Proof {
-        let mut hashset: HashSet<dyn Condition>;
-        let mut conditions = self.conditions;
-        let mut fathers = self.fathers;
-        let mut discribe = self.describe;
-        for i in 0..other.conditions.len(){
-            if !hashset.contains(&other.conditions[i]) {
-                conditions.push(other.conditions[i]);
-                fathers.push(other.fathers[i]);
-                discribe.push(other.describe[i]);
-                hashset.insert(other.conditions[i]);
-            }
+
+    fn add(self, other: Proof) -> Proof {
+        let mut proof = self;
+        for i in 0..other.conditions.len() {
+            proof.push_step(
+                other.conditions[i].clone(),
+                other.fathers[i].clone(),
+                other.describe[i],
+            );
         }
-        Proof{conditions, fathers, describe: discribe }
+        proof
     }
 }

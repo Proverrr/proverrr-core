@@ -1,4 +1,5 @@
-use crate::figure::*;
+use crate::figure::Figure;
+
 pub trait BaseTransfer {
-    fn transfer(figure: &mut Figure) -> bool;
+    fn transfer(&self, figure: &mut Figure) -> bool;
 }

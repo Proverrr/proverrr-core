@@ -1,12 +1,20 @@
-use crate::figure::object;
-use crate::prove::condition::Condition;
+use crate::figure::Object;
 use crate::ratio::Ratio;
 
-#[derive(PartialEq)]
-pub struct SumCondition{
-    //sum(a)=sum(b_objects)+sum(b_const)
-    a: Vec<object::Object>,
-    b_objects: Vec<object::Object>,
-    b_const: Ratio
+// sum(a) = sum(b_objects) + b_const
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SumCondition {
+    pub a: Vec<Object>,
+    pub b_objects: Vec<Object>,
+    pub b_const: Ratio,
 }
-impl Condition for SumCondition {}
+
+impl SumCondition {
+    pub fn new(a: Vec<Object>, b_objects: Vec<Object>, b_const: Ratio) -> Self {
+        SumCondition {
+            a,
+            b_objects,
+            b_const,
+        }
+    }
+}
