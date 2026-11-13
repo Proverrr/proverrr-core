@@ -32,7 +32,7 @@ impl BaseTransfer for ParallelTransfer {
 
 fn collect_parallel(figure: &Figure) -> Vec<ParallelCondition> {
     figure
-        .conditions
+        .conditions()
         .iter()
         .filter_map(|condition| match condition {
             Condition::Parallel(parallel) => Some(parallel.clone()),
