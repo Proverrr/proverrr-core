@@ -36,7 +36,7 @@ fn collect_parallel(figure: &Figure) -> Vec<ParallelCondition> {
         .iter()
         .filter_map(|condition| match condition {
             Condition::Parallel(parallel) => Some(parallel.clone()),
-            Condition::Sum(_) => None,
+            _ => None,
         })
         .collect()
 }

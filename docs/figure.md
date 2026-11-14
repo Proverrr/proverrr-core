@@ -1,15 +1,15 @@
 # Figure API
 
 `Figure` ([source](../src/figure/mod.rs)) is the container for one problem: it
-owns every element and every known condition, and hands out an `ID` for each of
-them. Elements are added by value, so a line or a segment is built from the IDs
-of its points.
+owns every element and every known condition. A point is an abstract identity
+returned by `add_point`; the other elements are added by value and get an `ID`.
+A line or a segment is built from points.
 
 ## Add elements
 
 | Method | Returns | Meaning |
 | --- | --- | --- |
-| `add_point(Point)` | `ID` | a point with exact coordinates |
+| `add_point()` | `Point` | a new abstract point |
 | `add_line(Line)` | `ID` | a full line through two points |
 | `add_segment(Segment)` | `ID` | the part of a line between two points |
 | `add_ray(Ray)` | `ID` | an origin and the point it goes through |
@@ -40,14 +40,16 @@ are expected to be known already; unknown ones are skipped.
 
 ## Elements
 
-- `Point { x, y }` — exact rational coordinates; `Point::origin()` is `(0, 0)`.
+- `Point` — an abstract point identity, created by `add_point()`; `point.id()`
+  is its index in the figure. It carries no coordinates.
 - `Line { a, b }` — a full line through the points `a` and `b`.
 - `Segment { a, b }` — the part of a line between `a` and `b`.
 - `Ray { origin, through }` — starts at `origin` and goes through `through`.
+- `Triangle { a, b, c }` — three vertices; used by `CongruentCondition`.
 - `Object { kind, points }` — a measurable quantity, either
   `Object::length(a, b)` or `Object::angle(a, b, c)` with `b` as the vertex.
 - `PanLine` — a line, segment or ray; conditions accept all three.
   `PanLine::line(a, b)`, `PanLine::segment(a, b)` and `PanLine::ray(a, b)` build
-  one from point IDs.
+  one from points.
 
 `ID`s are independent per kind: point `0` and segment `0` are different elements.

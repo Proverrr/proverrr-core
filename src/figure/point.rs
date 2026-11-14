@@ -1,20 +1,21 @@
-use crate::ratio::Ratio;
+use super::ID;
 
-/// A point with exact rational coordinates.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+/// An abstract point, identified by its [`ID`] inside a figure.
+///
+/// Points carry no coordinates; the figure hands them out with
+/// [`crate::figure::Figure::add_point`].
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Point {
-    pub x: Ratio,
-    pub y: Ratio,
+    id: ID,
 }
 
 impl Point {
-    /// The point at the coordinates `x` and `y`.
-    pub fn new(x: Ratio, y: Ratio) -> Self {
-        Point { x, y }
+    pub fn new(id: ID) -> Self {
+        Point { id }
     }
 
-    /// The point `(0, 0)`.
-    pub fn origin() -> Self {
-        Point::new(Ratio::from(0), Ratio::from(0))
+    /// The index of this point inside its figure.
+    pub fn id(&self) -> ID {
+        self.id
     }
 }

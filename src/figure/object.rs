@@ -1,4 +1,4 @@
-use super::ID;
+use super::Point;
 
 /// What kind of quantity an [`Object`] measures.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -13,12 +13,12 @@ pub enum ObjectType {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Object {
     pub kind: ObjectType,
-    pub points: Vec<ID>,
+    pub points: Vec<Point>,
 }
 
 impl Object {
     /// The length of the segment between the points `a` and `b`.
-    pub fn length(a: ID, b: ID) -> Self {
+    pub fn length(a: Point, b: Point) -> Self {
         Object {
             kind: ObjectType::Length,
             points: vec![a, b],
@@ -26,7 +26,7 @@ impl Object {
     }
 
     /// The angle `abc`, with `b` as the vertex.
-    pub fn angle(a: ID, b: ID, c: ID) -> Self {
+    pub fn angle(a: Point, b: Point, c: Point) -> Self {
         Object {
             kind: ObjectType::Angle,
             points: vec![a, b, c],

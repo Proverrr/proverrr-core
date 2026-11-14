@@ -4,18 +4,21 @@
 pub mod line;
 /// Measurable quantities such as lengths and angles.
 pub mod object;
-/// Points with exact rational coordinates.
+/// Abstract points identified by their index in a figure.
 pub mod point;
 /// Half a line: an origin and a direction.
 pub mod ray;
 /// The part of a line between two points.
 pub mod segment;
+/// A triangle defined by three vertices.
+pub mod triangle;
 
 pub use line::Line;
 pub use object::{Object, ObjectType};
 pub use point::Point;
 pub use ray::Ray;
 pub use segment::Segment;
+pub use triangle::Triangle;
 
 use crate::prove::condition::Condition;
 use crate::prove::proof::Proof;
@@ -41,17 +44,17 @@ pub enum PanLine {
 
 impl PanLine {
     /// The line through the points `a` and `b`.
-    pub fn line(a: ID, b: ID) -> Self {
+    pub fn line(a: Point, b: Point) -> Self {
         PanLine::Line(Line::new(a, b))
     }
 
     /// The segment between the points `a` and `b`.
-    pub fn segment(a: ID, b: ID) -> Self {
+    pub fn segment(a: Point, b: Point) -> Self {
         PanLine::Segment(Segment::new(a, b))
     }
 
     /// The ray from `origin` through `through`.
-    pub fn ray(origin: ID, through: ID) -> Self {
+    pub fn ray(origin: Point, through: Point) -> Self {
         PanLine::Ray(Ray::new(origin, through))
     }
 }
@@ -65,19 +68,18 @@ impl PanLine {
 ///
 /// # Example
 /// ```
-/// use proverrr_core::figure::{Figure, Point, Segment};
-/// use proverrr_core::ratio::Ratio;
+/// use proverrr_core::figure::{Figure, Segment};
 ///
 /// let mut figure = Figure::new();
-/// let a = figure.add_point(Point::new(Ratio::from(0), Ratio::from(0)));
-/// let b = figure.add_point(Point::new(Ratio::from(4), Ratio::from(0)));
-/// let c = figure.add_point(Point::new(Ratio::from(0), Ratio::from(3)));
+/// let a = figure.add_point();
+/// let b = figure.add_point();
+/// let c = figure.add_point();
 ///
 /// let bottom = figure.add_segment(Segment::new(a, b));
 /// figure.add_segment(Segment::new(a, c));
 ///
 /// assert_eq!(bottom, 0);
-/// assert_eq!(figure.point(a), Some(&Point::new(Ratio::from(0), Ratio::from(0))));
+/// assert_eq!(figure.point(a.id()), Some(&a));
 /// assert_eq!(figure.segment(bottom), Some(&Segment::new(a, b)));
 /// assert_eq!(figure.points().len(), 3);
 /// ```
@@ -98,10 +100,11 @@ impl Figure {
         Figure::default()
     }
 
-    /// Adds `point` and returns its ID.
-    pub fn add_point(&mut self, point: Point) -> ID {
+    /// Adds a new point and returns it.
+    pub fn add_point(&mut self) -> Point {
+        let point = Point::new(self.points.len() as ID);
         self.points.push(point);
-        (self.points.len() - 1) as ID
+        point
     }
 
     /// Adds `line` and returns its ID.
