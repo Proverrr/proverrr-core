@@ -1,6 +1,6 @@
 use std::collections::{BTreeSet, HashMap};
 
-use crate::figure::{Figure, Point, ObjectType};
+use crate::figure::{Figure, ObjectType, Point};
 use crate::prove::condition::Condition;
 use crate::ratio::Ratio;
 
@@ -101,7 +101,14 @@ impl Facts {
     }
 
     // A shared side is equal to itself and needs no father.
-    pub fn side_equal(&self, a: Point, b: Point, c: Point, d: Point, fathers: &mut Vec<Condition>) -> bool {
+    pub fn side_equal(
+        &self,
+        a: Point,
+        b: Point,
+        c: Point,
+        d: Point,
+        fathers: &mut Vec<Condition>,
+    ) -> bool {
         let k1 = len_key(a, b);
         let k2 = len_key(c, d);
         if k1 == k2 {
