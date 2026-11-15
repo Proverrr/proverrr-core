@@ -101,11 +101,7 @@ fn known_lines(figure: &Figure) -> Vec<PanLine> {
                     }
                 }
             }
-            Condition::Side(s) => {
-                if !lines.contains(&s.line) {
-                    lines.push(s.line);
-                }
-            }
+            Condition::Side(s) if !lines.contains(&s.line) => lines.push(s.line),
             _ => {}
         }
     }

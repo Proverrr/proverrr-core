@@ -170,7 +170,7 @@ mod tests {
     #[test]
     fn derives_opposite_side_equality() {
         let mut figure = Figure::new();
-        let p: Vec<_> = (0..4).map(|i| crate::figure::Point::new(i)).collect();
+        let p: Vec<_> = (0..4).map(crate::figure::Point::new).collect();
         figure.add_condition(Condition::Parallel(ParallelCondition::new(
             PanLine::line(p[0], p[1]),
             PanLine::line(p[3], p[2]),

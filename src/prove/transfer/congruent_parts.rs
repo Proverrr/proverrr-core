@@ -64,7 +64,7 @@ mod tests {
     #[test]
     fn sss_gives_part_equalities() {
         let mut figure = Figure::new();
-        let p: Vec<_> = (0..6).map(|i| crate::figure::Point::new(i)).collect();
+        let p: Vec<_> = (0..6).map(crate::figure::Point::new).collect();
         for (x, y, u, v) in [
             (p[0], p[1], p[3], p[4]),
             (p[1], p[2], p[4], p[5]),

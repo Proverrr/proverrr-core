@@ -50,7 +50,7 @@ impl BaseTransfer for MidpointTransfer {
             candidates.push((between, vec![father]));
         }
         for s in &sums {
-            if let Some((a, m, b)) = halves(&s) {
+            if let Some((a, m, b)) = halves(s) {
                 for b_ in &betweens {
                     let pts = [b_.a, b_.mid, b_.b];
                     if pts.contains(&a) && pts.contains(&m) && pts.contains(&b) {
