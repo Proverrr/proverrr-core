@@ -43,6 +43,7 @@ jobs:
         id: published
         run: |
           code=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "User-Agent: proverrr-core-release (github.com/Proverrr/proverrr-core)" \
             "https://crates.io/api/v1/crates/proverrr-core/${{ steps.version.outputs.current }}")
           exists=$([ "$code" = "200" ] && echo true || echo false)
           echo "exists=$exists" >> "$GITHUB_OUTPUT"
