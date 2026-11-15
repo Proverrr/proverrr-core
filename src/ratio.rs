@@ -3,12 +3,12 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Ratio {
-    a: i32,
-    b: i32,
+    a: i64,
+    b: i64,
 }
 
 impl Ratio {
-    pub fn new(a: i32, b: i32) -> Self {
+    pub fn new(a: i64, b: i64) -> Self {
         assert!(b != 0, "denominator must not be zero");
         let sign = if b < 0 { -1 } else { 1 };
         let (a, b) = (a * sign, b * sign);
@@ -16,11 +16,11 @@ impl Ratio {
         Ratio { a: a / g, b: b / g }
     }
 
-    pub fn numerator(&self) -> i32 {
+    pub fn numerator(&self) -> i64 {
         self.a
     }
 
-    pub fn denominator(&self) -> i32 {
+    pub fn denominator(&self) -> i64 {
         self.b
     }
 
@@ -29,7 +29,7 @@ impl Ratio {
     }
 }
 
-fn gcd(a: i32, b: i32) -> i32 {
+fn gcd(a: i64, b: i64) -> i64 {
     let (mut a, mut b) = (a.abs(), b.abs());
     while b != 0 {
         let r = a % b;
@@ -83,8 +83,8 @@ impl Neg for Ratio {
     }
 }
 
-impl From<i32> for Ratio {
-    fn from(a: i32) -> Ratio {
+impl From<i64> for Ratio {
+    fn from(a: i64) -> Ratio {
         Ratio::new(a, 1)
     }
 }

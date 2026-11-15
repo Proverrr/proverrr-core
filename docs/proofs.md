@@ -4,6 +4,8 @@
 
 - `Condition::Parallel(ParallelCondition)` — two `PanLine`s are parallel. The
   pair is stored in a fixed order, so `a ∥ b` and `b ∥ a` are the same condition.
+- `Condition::Perpendicular(PerpendicularCondition)` — two `PanLine`s meet at
+  a right angle; stored in a fixed order.
 - `Condition::Sum(SumCondition)` — `SumCondition` states that the sum of the
   objects in its `a` field equals the sum of `b_objects` plus `b_const`. Lengths
   and angles are both `Object`s, so one condition covers both.
@@ -16,6 +18,12 @@
   configuration that abstract points alone cannot express.
 - `Condition::Collinear(CollinearCondition)` — three points lie on one line,
   stored in a fixed order.
+- `Condition::Midpoint(MidpointCondition)` — `mid` is the midpoint of segment
+  `ab`, stored with the endpoints in a fixed order.
+- `Condition::Between(BetweenCondition)` — `mid` lies strictly between `a` and
+  `b` on their line. Between-ness is the primitive that carries orientation;
+  the `BetweenFacts` and `SideFacts` transfers turn it into collinearity,
+  linear pairs, vertical angles, exterior angles and side relations.
 
 ### Congruence premises
 
@@ -28,8 +36,7 @@ in degrees:
   `SumCondition::new(vec![Object::angle(a, b, c)], vec![], Ratio::from(90))`.
 
 A side or angle shared by both triangles counts as equal to itself. Two right
-angles count as equal even without a direct equality condition. Equalities are
-read as given; transitivity of `Sum` is not derived yet.
+angles count as equal even without a direct equality condition.
 
 ### Parallel angle premises
 
@@ -71,10 +78,19 @@ A `Rule` says which transfers to run; `Rule::new()` enables every one of them:
 
 | Field | Transfer | Step it records |
 | --- | --- | --- |
+| `sum_transitive` | `SumTransfer` | `A = B + c1` and `B = C + c2` give `A = C + c1 + c2`; every known `Sum` is also read in reverse |
+| `angle_sums` | `AngleSumTransfer` | the three angles of any triangle sum to 180 |
+| `between` | `BetweenTransfer` | between-ness gives collinearity, linear pairs, vertical angles and exterior angles |
+| `side_transitive` | `SideTransfer` | side relations on one line chain; between-ness at a point of a line makes the endpoints opposite sides |
+| `isosceles` | `IsoscelesTransfer` | equal sides from one apex give equal base angles, and equal base angles give equal sides |
+| `congruent_parts` | `CongruentPartsTransfer` | a congruence gives three equal sides and three equal angles |
 | `parallel_transitive` | `ParallelTransfer` | `a ∥ b` and `b ∥ c` give `a ∥ c` |
 | `parallel_corresponding` | `ParallelAngleTransfer` | corresponding angles are equal |
 | `parallel_alternate_interior` | `ParallelAngleTransfer` | alternate interior angles are equal |
 | `parallel_co_interior` | `ParallelAngleTransfer` | same-side interior angles are supplementary |
+| `parallelogram` | `ParallelogramTransfer` | a quadrilateral with both pairs of opposite sides parallel has equal opposite sides and angles |
+| `perpendicular` | `PerpendicularTransfer` | right angles where perpendicular lines meet; a line perpendicular to one of two parallels is perpendicular to the other |
+| `midpoint` | `MidpointTransfer` | a midpoint splits its segment and is collinear with the endpoints; collinear equal parts make a midpoint |
 | `congruent_sss` | `CongruentTransfer` | three pairs of equal sides give congruent triangles |
 | `congruent_sas` | `CongruentTransfer` | two sides and the included angle |
 | `congruent_asa` | `CongruentTransfer` | two angles and the included side |
@@ -87,7 +103,17 @@ as the fathers of the new condition.
 
 ## Status
 
-Parallel transitivity, the parallel angle properties (corresponding, alternate
-interior, same-side interior) and the five triangle congruence criteria (SSS,
-SAS, ASA, AAS, HL) are implemented. Transitivity of `Sum` conditions and other
-angle relations are not derived yet.
+Everything is derived by symbolic forward chaining — no coordinates anywhere.
+Implemented: sum transitivity (with reverse readings, so equalities chain),
+triangle angle sums, between-ness facts (collinearity, linear pairs, vertical
+angles, exterior angles), side-relation chaining, the isosceles theorems in
+both directions, congruence part derivation, parallel transitivity, the
+parallel angle properties, the parallelogram properties, perpendicular line
+facts, midpoint facts and the five triangle congruence criteria (SSS, SAS,
+ASA, AAS, HL).
+
+Nondegenerate configurations are assumed where a theorem needs them (the
+isosceles rules and the congruence criteria), as is usual for geometry
+provers; between-ness based rules are sound in degenerate positions too.
+Not derived yet: similarity, side ratios and circles (inscribed angles,
+tangents).

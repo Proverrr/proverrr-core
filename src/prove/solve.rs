@@ -1,40 +1,94 @@
 use crate::figure::Figure;
 use crate::prove::condition::Condition;
 use crate::prove::proof::Proof;
+use crate::prove::transfer::angle_sums::AngleSumTransfer;
 use crate::prove::transfer::base_transfer::BaseTransfer;
+use crate::prove::transfer::between_facts::BetweenTransfer;
+use crate::prove::transfer::congruent_parts::CongruentPartsTransfer;
 use crate::prove::transfer::congruent_transfer::{CongruentTransfer, Criterion};
+use crate::prove::transfer::isosceles::IsoscelesTransfer;
+use crate::prove::transfer::midpoint_facts::MidpointTransfer;
 use crate::prove::transfer::parallel_angle_transfer::ParallelAngleTransfer;
 use crate::prove::transfer::parallel_transfer::ParallelTransfer;
+use crate::prove::transfer::parallelogram::ParallelogramTransfer;
+use crate::prove::transfer::perpendicular_facts::PerpendicularTransfer;
+use crate::prove::transfer::side_facts::SideTransfer;
+use crate::prove::transfer::sum_transfer::SumTransfer;
 
 pub struct Rule {
-    pub parallel_transitive: bool,
-    pub parallel_corresponding: bool,
-    pub parallel_alternate_interior: bool,
-    pub parallel_co_interior: bool,
+    pub sum_transitive: bool,
+    pub angle_sums: bool,
+    pub between: bool,
+    pub side_transitive: bool,
+    pub isosceles: bool,
+    pub congruent_parts: bool,
     pub congruent_sss: bool,
     pub congruent_sas: bool,
     pub congruent_asa: bool,
     pub congruent_aas: bool,
     pub congruent_hl: bool,
+    pub parallel_transitive: bool,
+    pub parallel_corresponding: bool,
+    pub parallel_alternate_interior: bool,
+    pub parallel_co_interior: bool,
+    pub parallelogram: bool,
+    pub perpendicular: bool,
+    pub midpoint: bool,
 }
 
 impl Rule {
     pub fn new() -> Self {
         Rule {
-            parallel_transitive: true,
-            parallel_corresponding: true,
-            parallel_alternate_interior: true,
-            parallel_co_interior: true,
+            sum_transitive: true,
+            angle_sums: true,
+            between: true,
+            side_transitive: true,
+            isosceles: true,
+            congruent_parts: true,
             congruent_sss: true,
             congruent_sas: true,
             congruent_asa: true,
             congruent_aas: true,
             congruent_hl: true,
+            parallel_transitive: true,
+            parallel_corresponding: true,
+            parallel_alternate_interior: true,
+            parallel_co_interior: true,
+            parallelogram: true,
+            perpendicular: true,
+            midpoint: true,
         }
     }
 
     pub fn run(&self, figure: &mut Figure) -> bool {
         let mut changed = false;
+        if self.angle_sums {
+            changed |= AngleSumTransfer.transfer(figure);
+        }
+        if self.between {
+            changed |= BetweenTransfer.transfer(figure);
+        }
+        if self.side_transitive {
+            changed |= SideTransfer.transfer(figure);
+        }
+        if self.sum_transitive {
+            changed |= SumTransfer.transfer(figure);
+        }
+        if self.isosceles {
+            changed |= IsoscelesTransfer.transfer(figure);
+        }
+        if self.midpoint {
+            changed |= MidpointTransfer.transfer(figure);
+        }
+        if self.perpendicular {
+            changed |= PerpendicularTransfer.transfer(figure);
+        }
+        if self.parallelogram {
+            changed |= ParallelogramTransfer.transfer(figure);
+        }
+        if self.congruent_parts {
+            changed |= CongruentPartsTransfer.transfer(figure);
+        }
         if self.parallel_transitive {
             changed |= ParallelTransfer.transfer(figure);
         }
@@ -125,6 +179,32 @@ mod tests {
         figure.add_condition(Condition::Parallel(ParallelCondition::new(l1, l2)));
         figure.add_condition(Condition::Side(SideCondition::new(t, a, d, same)));
         (a, b, c, d)
+    }
+
+    #[test]
+    fn solves_sum_transitivity() {
+        let mut figure = Figure::new();
+        let x = Object::length(Point::new(0), Point::new(1));
+        let y = Object::length(Point::new(2), Point::new(3));
+        let z = Object::length(Point::new(4), Point::new(5));
+        figure.add_condition(Condition::Sum(SumCondition::new(
+            vec![x.clone()],
+            vec![y.clone()],
+            Ratio::from(0),
+        )));
+        figure.add_condition(Condition::Sum(SumCondition::new(
+            vec![y],
+            vec![z.clone()],
+            Ratio::from(0),
+        )));
+
+        let target = Condition::Sum(SumCondition::new(
+            vec![x],
+            vec![z],
+            Ratio::from(0),
+        ));
+        let proof = solve(&mut figure, &target, &Rule::new()).expect("sum transitivity");
+        assert_eq!(proof.describe, vec![TransferType::SumTransitive]);
     }
 
     #[test]
