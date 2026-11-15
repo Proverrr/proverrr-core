@@ -5,6 +5,7 @@
 //! with a [`prove::proof::Proof`] recording the steps that derived it, and
 //! [`prove::solve::solve`] keeps deriving conditions until the target is proven.
 
+pub mod ffi;
 pub mod figure;
 pub mod prove;
 pub mod ratio;
