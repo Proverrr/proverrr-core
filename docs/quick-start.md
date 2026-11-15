@@ -1,3 +1,4 @@
+
 # Quick start
 
 ## The model
@@ -15,7 +16,8 @@ conditions that are known about them:
   the transfers of a rule until the target condition is proven.
 
 Measures are exact rational numbers, so nothing is lost to floating point.
-Points are abstract identities, not coordinates.
+Points are abstract identities, not coordinates; orientation is expressed
+with `Side` and `Between` conditions (see [Conditions and proofs](proofs.md)).
 
 ## Example
 

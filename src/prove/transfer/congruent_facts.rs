@@ -17,6 +17,18 @@ pub fn ang_key(a: Point, b: Point, c: Point) -> AngleKey {
     (b, lo, hi)
 }
 
+// Length and angle objects in canonical point order, so equal quantities
+// produce equal conditions.
+pub fn len_object(p: Point, q: Point) -> crate::figure::Object {
+    let (a, b) = len_key(p, q);
+    crate::figure::Object::length(a, b)
+}
+
+pub fn ang_object(a: Point, b: Point, c: Point) -> crate::figure::Object {
+    let (vertex, lo, hi) = ang_key(a, b, c);
+    crate::figure::Object::angle(lo, vertex, hi)
+}
+
 // The equalities and right angles read from the figure's Sum conditions.
 pub struct Facts {
     length_eq: HashMap<(LenKey, LenKey), Condition>,
