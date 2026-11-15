@@ -1,8 +1,12 @@
 name: Release
 
 on:
-  push:
-    branches: [main]
+  workflow_call:
+    inputs:
+      version:
+        description: Version to publish (read from Cargo.toml when empty)
+        required: false
+        type: string
   workflow_dispatch:
 
 concurrency:
@@ -22,32 +26,29 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Detect version bump
+      - name: Resolve version
         id: version
         run: |
-          current=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1 | tr -d '\r')
-          if [ -z "$current" ]; then
+          version="${{ inputs.version }}"
+          if [ -z "$version" ]; then
+            version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1 | tr -d '\r')
+          fi
+          if [ -z "$version" ]; then
             echo "cannot read version from Cargo.toml" >&2
             exit 1
           fi
-          last_version=""
-          if last_tag=$(git describe --tags --match 'v*' --abbrev=0 2>/dev/null); then
-            last_version=$(git show "$last_tag:Cargo.toml" | sed -n 's/^version = "\(.*\)"/\1/p' | head -1 | tr -d '\r')
-          fi
-          bumped=$([ "$current" != "$last_version" ] && echo true || echo false)
-          echo "current=$current" >> "$GITHUB_OUTPUT"
-          echo "bumped=$bumped" >> "$GITHUB_OUTPUT"
-          echo "version: current=$current last_tag=$last_version bumped=$bumped"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "version=$version"
 
       - name: Check if version is already on crates.io
         id: published
         run: |
           code=$(curl -s -o /dev/null -w '%{http_code}' \
             -H "User-Agent: proverrr-core-release (github.com/Proverrr/proverrr-core)" \
-            "https://crates.io/api/v1/crates/proverrr-core/${{ steps.version.outputs.current }}")
+            "https://crates.io/api/v1/crates/proverrr-core/${{ steps.version.outputs.version }}")
           exists=$([ "$code" = "200" ] && echo true || echo false)
           echo "exists=$exists" >> "$GITHUB_OUTPUT"
-          echo "crates.io version ${{ steps.version.outputs.current }}: HTTP $code"
+          echo "crates.io version ${{ steps.version.outputs.version }}: HTTP $code"
 
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
@@ -65,11 +66,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          current="${{ steps.version.outputs.current }}"
-          if git rev-parse "v$current" >/dev/null 2>&1; then
-            echo "tag v$current already exists, skipping release"
+          version="${{ steps.version.outputs.version }}"
+          if git rev-parse "v$version" >/dev/null 2>&1; then
+            echo "tag v$version already exists, skipping release"
             exit 0
           fi
-          gh release create "v$current" \
-            --title "proverrr-core v$current" \
+          gh release create "v$version" \
+            --title "proverrr-core v$version" \
             --generate-notes
