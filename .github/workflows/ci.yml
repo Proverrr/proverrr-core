@@ -83,3 +83,5 @@ jobs:
     with:
       version: ${{ needs.check-version.outputs.version }}
     secrets: inherit
+    permissions:
+      contents: write
