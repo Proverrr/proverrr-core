@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect version bump
+        id: version
+        run: |
+          current=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
+          if [ -z "$current" ]; then
+            echo "cannot read version from Cargo.toml" >&2
+            exit 1
+          fi
+          last_version=""
+          if last_tag=$(git describe --tags --match 'v*' --abbrev=0 2>/dev/null); then
+            last_version=$(git show "$last_tag:Cargo.toml" | sed -n 's/^version = "\(.*\)"/\1/p' | head -1)
+          fi
+          bumped=$([ "$current" != "$last_version" ] && echo true || echo false)
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "bumped=$bumped" >> "$GITHUB_OUTPUT"
+          echo "version: current=$current last_tag=$last_version bumped=$bumped"
+
+      - name: Check if version is already on crates.io
+        id: published
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' \
+            "https://crates.io/api/v1/crates/proverrr-core/${{ steps.version.outputs.current }}")
+          exists=$([ "$code" = "200" ] && echo true || echo false)
+          echo "exists=$exists" >> "$GITHUB_OUTPUT"
+          echo "crates.io version ${{ steps.version.outputs.current }}: HTTP $code"
+
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Test
+        run: cargo test
+
+      - name: Publish to crates.io
+        if: steps.published.outputs.exists == 'false'
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish
+
+      - name: Create tag and GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          current="${{ steps.version.outputs.current }}"
+          if git rev-parse "v$current" >/dev/null 2>&1; then
+            echo "tag v$current already exists, skipping release"
+            exit 0
+          fi
+          gh release create "v$current" \
+            --title "proverrr-core v$current" \
+            --generate-notes
