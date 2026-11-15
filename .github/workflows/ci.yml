@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --locked
+      - run: cargo test
+      - run: cargo build --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: proverrr-core-${{ matrix.os }}
+          path: |
+            target/release/*.dll
+            target/release/*.so
+            target/release/*.dylib
+          if-no-files-found: error
+
+  lint:
+    name: clippy + fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --all-targets -- -D warnings
+
+  check-version:
+    name: detect version bump
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      bumped: ${{ steps.version.outputs.bumped }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: version
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1 | tr -d '\r')
+          if [ -z "$version" ]; then
+            echo "cannot read version from Cargo.toml" >&2
+            exit 1
+          fi
+          last_version=""
+          if last_tag=$(git describe --tags --match 'v*' --abbrev=0 2>/dev/null); then
+            last_version=$(git show "$last_tag:Cargo.toml" | sed -n 's/^version = "\(.*\)"/\1/p' | head -1 | tr -d '\r')
+          fi
+          bumped=$([ "$version" != "$last_version" ] && echo true || echo false)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "bumped=$bumped" >> "$GITHUB_OUTPUT"
+          echo "version: current=$version last_tag=$last_version bumped=$bumped"
+
+  publish:
+    name: publish and tag
+    needs: [test, lint, check-version]
+    if: needs.check-version.outputs.bumped == 'true'
+    uses: ./.github/workflows/release.yml
+    with:
+      version: ${{ needs.check-version.outputs.version }}
+    secrets: inherit
+    permissions:
+      contents: write

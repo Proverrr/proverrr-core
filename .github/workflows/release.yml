@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Version to publish (read from Cargo.toml when empty)
+        required: false
+        type: string
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version
+        id: version
+        run: |
+          version="${{ inputs.version }}"
+          if [ -z "$version" ]; then
+            version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1 | tr -d '\r')
+          fi
+          if [ -z "$version" ]; then
+            echo "cannot read version from Cargo.toml" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "version=$version"
+
+      - name: Check if version is already on crates.io
+        id: published
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "User-Agent: proverrr-core-release (github.com/Proverrr/proverrr-core)" \
+            "https://crates.io/api/v1/crates/proverrr-core/${{ steps.version.outputs.version }}")
+          exists=$([ "$code" = "200" ] && echo true || echo false)
+          echo "exists=$exists" >> "$GITHUB_OUTPUT"
+          echo "crates.io version ${{ steps.version.outputs.version }}: HTTP $code"
+
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Test
+        run: cargo test
+
+      - name: Publish to crates.io
+        if: steps.published.outputs.exists == 'false'
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish
+
+      - name: Create tag and GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          if git rev-parse "v$version" >/dev/null 2>&1; then
+            echo "tag v$version already exists, skipping release"
+            exit 0
+          fi
+          gh release create "v$version" \
+            --title "proverrr-core v$version" \
+            --generate-notes
