@@ -32,7 +32,8 @@ impl BaseTransfer for ParallelogramTransfer {
         let mut candidates = Vec::new();
         for i in 0..parallels.len() {
             for j in (i + 1)..parallels.len() {
-                if let Some((a, b, c, d)) = parallelogram(&parallels[i], &parallels[j], &collinear) {
+                if let Some((a, b, c, d)) = parallelogram(&parallels[i], &parallels[j], &collinear)
+                {
                     let fathers = vec![
                         Condition::Parallel(parallels[i].clone()),
                         Condition::Parallel(parallels[j].clone()),

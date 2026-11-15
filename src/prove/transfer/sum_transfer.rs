@@ -53,11 +53,7 @@ impl BaseTransfer for SumTransfer {
                 if first.a == second.b && first.c == second.c {
                     continue;
                 }
-                let new = SumCondition::new(
-                    first.a.clone(),
-                    second.b.clone(),
-                    first.c + second.c,
-                );
+                let new = SumCondition::new(first.a.clone(), second.b.clone(), first.c + second.c);
                 if new.a == new.b_objects && new.b_const.is_zero() {
                     continue;
                 }

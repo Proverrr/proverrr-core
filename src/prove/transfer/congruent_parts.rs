@@ -31,8 +31,16 @@ impl BaseTransfer for CongruentPartsTransfer {
                     Ratio::from(0),
                 ));
                 let angle = Condition::Sum(SumCondition::new(
-                    vec![ang_object(angle_at(a, i).0, angle_at(a, i).1, angle_at(a, i).2)],
-                    vec![ang_object(angle_at(b, i).0, angle_at(b, i).1, angle_at(b, i).2)],
+                    vec![ang_object(
+                        angle_at(a, i).0,
+                        angle_at(a, i).1,
+                        angle_at(a, i).2,
+                    )],
+                    vec![ang_object(
+                        angle_at(b, i).0,
+                        angle_at(b, i).1,
+                        angle_at(b, i).2,
+                    )],
                     Ratio::from(0),
                 ));
                 let fathers = vec![Condition::Congruent(*c)];
@@ -57,7 +65,11 @@ mod tests {
     fn sss_gives_part_equalities() {
         let mut figure = Figure::new();
         let p: Vec<_> = (0..6).map(|i| crate::figure::Point::new(i)).collect();
-        for (x, y, u, v) in [(p[0], p[1], p[3], p[4]), (p[1], p[2], p[4], p[5]), (p[2], p[0], p[5], p[3])] {
+        for (x, y, u, v) in [
+            (p[0], p[1], p[3], p[4]),
+            (p[1], p[2], p[4], p[5]),
+            (p[2], p[0], p[5], p[3]),
+        ] {
             figure.add_condition(Condition::Sum(SumCondition::new(
                 vec![len_object(x, y)],
                 vec![len_object(u, v)],

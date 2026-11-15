@@ -28,7 +28,11 @@ impl BaseTransfer for IsoscelesTransfer {
                     vec![ang_object(apex, u2, u1)],
                     Ratio::from(0),
                 ));
-                candidates.push((condition, vec![Condition::Sum(s.clone())], TransferType::IsoscelesAngles));
+                candidates.push((
+                    condition,
+                    vec![Condition::Sum(s.clone())],
+                    TransferType::IsoscelesAngles,
+                ));
             }
             if let Some((apex, u1, u2)) = equal_base_angles(s) {
                 let condition = Condition::Sum(SumCondition::new(
@@ -36,7 +40,11 @@ impl BaseTransfer for IsoscelesTransfer {
                     vec![len_object(apex, u2)],
                     Ratio::from(0),
                 ));
-                candidates.push((condition, vec![Condition::Sum(s.clone())], TransferType::IsoscelesSides));
+                candidates.push((
+                    condition,
+                    vec![Condition::Sum(s.clone())],
+                    TransferType::IsoscelesSides,
+                ));
             }
         }
 
@@ -49,7 +57,13 @@ impl BaseTransfer for IsoscelesTransfer {
 }
 
 // length(p,u1) = length(p,u2): u1 and u2 are the base, p the apex.
-fn equal_sides(s: &SumCondition) -> Option<(crate::figure::Point, crate::figure::Point, crate::figure::Point)> {
+fn equal_sides(
+    s: &SumCondition,
+) -> Option<(
+    crate::figure::Point,
+    crate::figure::Point,
+    crate::figure::Point,
+)> {
     let (x, y) = single_pair(s)?;
     if x.kind != ObjectType::Length || y.kind != ObjectType::Length {
         return None;
@@ -69,14 +83,34 @@ fn equal_sides(s: &SumCondition) -> Option<(crate::figure::Point, crate::figure:
 
 // angle(p,u1,u2) = angle(p,u2,u1): equal angles at u1 and u2, so the sides
 // from p to u1 and p to u2 are equal.
-fn equal_base_angles(s: &SumCondition) -> Option<(crate::figure::Point, crate::figure::Point, crate::figure::Point)> {
+fn equal_base_angles(
+    s: &SumCondition,
+) -> Option<(
+    crate::figure::Point,
+    crate::figure::Point,
+    crate::figure::Point,
+)> {
     let (x, y) = single_pair(s)?;
     if x.kind != ObjectType::Angle || y.kind != ObjectType::Angle {
         return None;
     }
     for (a, b, c, d, e, f) in [
-        (x.points[0], x.points[1], x.points[2], y.points[0], y.points[1], y.points[2]),
-        (y.points[0], y.points[1], y.points[2], x.points[0], x.points[1], x.points[2]),
+        (
+            x.points[0],
+            x.points[1],
+            x.points[2],
+            y.points[0],
+            y.points[1],
+            y.points[2],
+        ),
+        (
+            y.points[0],
+            y.points[1],
+            y.points[2],
+            x.points[0],
+            x.points[1],
+            x.points[2],
+        ),
     ] {
         if a == d && b == f && c == e && b != c {
             return Some((a, b, c));
@@ -96,9 +130,9 @@ fn single_pair(s: &SumCondition) -> Option<(&Object, &Object)> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::figure::Point;
     use crate::figure::{Figure, Object};
     use crate::prove::solve::{Rule, solve};
-    use crate::figure::Point;
 
     #[test]
     fn derives_base_angles() {

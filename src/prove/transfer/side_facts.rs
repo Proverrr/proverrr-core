@@ -34,9 +34,7 @@ impl BaseTransfer for SideTransfer {
                     continue;
                 }
                 if let Some((x, y, same)) = combine(&sides[i], &sides[j]) {
-                    let cond = Condition::Side(SideCondition::new(
-                        sides[i].line, x, y, same,
-                    ));
+                    let cond = Condition::Side(SideCondition::new(sides[i].line, x, y, same));
                     candidates.push((
                         cond,
                         vec![Condition::Side(sides[i]), Condition::Side(sides[j])],
@@ -130,19 +128,16 @@ fn collinear_with(figure: &Figure, a: Point, c: Point, p: Point) -> bool {
 }
 
 fn collinear_father(figure: &Figure, a: Point, c: Point, p: Point) -> Option<Condition> {
-    figure
-        .conditions()
-        .iter()
-        .find_map(|cond| match cond {
-            Condition::Collinear(c_)
-                if [c_.a, c_.b, c_.c].contains(&a)
-                    && [c_.a, c_.b, c_.c].contains(&c)
-                    && [c_.a, c_.b, c_.c].contains(&p) =>
-            {
-                Some(cond.clone())
-            }
-            _ => None,
-        })
+    figure.conditions().iter().find_map(|cond| match cond {
+        Condition::Collinear(c_)
+            if [c_.a, c_.b, c_.c].contains(&a)
+                && [c_.a, c_.b, c_.c].contains(&c)
+                && [c_.a, c_.b, c_.c].contains(&p) =>
+        {
+            Some(cond.clone())
+        }
+        _ => None,
+    })
 }
 
 #[cfg(test)]
@@ -161,8 +156,9 @@ mod tests {
         figure.add_condition(Condition::Side(SideCondition::new(l, y, z, true)));
 
         let target = Condition::Side(SideCondition::new(l, x, z, true));
-        let proof = crate::prove::solve::solve(&mut figure, &target, &crate::prove::solve::Rule::new())
-            .expect("side chain");
+        let proof =
+            crate::prove::solve::solve(&mut figure, &target, &crate::prove::solve::Rule::new())
+                .expect("side chain");
         assert!(proof.describe.contains(&TransferType::SideFacts));
     }
 
@@ -184,8 +180,9 @@ mod tests {
         ));
 
         let target = Condition::Side(SideCondition::new(PanLine::line(l0, l1), a, b, false));
-        let proof = crate::prove::solve::solve(&mut figure, &target, &crate::prove::solve::Rule::new())
-            .expect("opposite sides");
+        let proof =
+            crate::prove::solve::solve(&mut figure, &target, &crate::prove::solve::Rule::new())
+                .expect("opposite sides");
         assert!(proof.describe.contains(&TransferType::SideFacts));
     }
 }

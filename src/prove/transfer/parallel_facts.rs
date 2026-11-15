@@ -82,7 +82,14 @@ pub fn match_config(parallel: &ParallelCondition, side: &SideCondition) -> Optio
         if p == q || pair(p, q) != pair(t[0], t[1]) {
             continue;
         }
-        return Some(Config { p, q, x, y, same: side.same, side: *side });
+        return Some(Config {
+            p,
+            q,
+            x,
+            y,
+            same: side.same,
+            side: *side,
+        });
     }
     None
 }

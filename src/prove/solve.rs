@@ -92,7 +92,10 @@ impl Rule {
         if self.parallel_transitive {
             changed |= ParallelTransfer.transfer(figure);
         }
-        if self.parallel_corresponding || self.parallel_alternate_interior || self.parallel_co_interior {
+        if self.parallel_corresponding
+            || self.parallel_alternate_interior
+            || self.parallel_co_interior
+        {
             changed |= ParallelAngleTransfer {
                 corresponding: self.parallel_corresponding,
                 alternate_interior: self.parallel_alternate_interior,
@@ -198,11 +201,7 @@ mod tests {
             Ratio::from(0),
         )));
 
-        let target = Condition::Sum(SumCondition::new(
-            vec![x],
-            vec![z],
-            Ratio::from(0),
-        ));
+        let target = Condition::Sum(SumCondition::new(vec![x], vec![z], Ratio::from(0)));
         let proof = solve(&mut figure, &target, &Rule::new()).expect("sum transitivity");
         assert_eq!(proof.describe, vec![TransferType::SumTransitive]);
     }
@@ -217,7 +216,10 @@ mod tests {
             Ratio::from(0),
         ));
         let proof = solve(&mut figure, &target, &Rule::new()).expect("alternate interior angles");
-        assert_eq!(proof.describe, vec![TransferType::ParallelAlternateInterior]);
+        assert_eq!(
+            proof.describe,
+            vec![TransferType::ParallelAlternateInterior]
+        );
     }
 
     #[test]

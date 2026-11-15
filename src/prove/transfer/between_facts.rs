@@ -1,7 +1,5 @@
 use crate::figure::Figure;
-use crate::prove::condition::{
-    BetweenCondition, CollinearCondition, Condition, SumCondition,
-};
+use crate::prove::condition::{BetweenCondition, CollinearCondition, Condition, SumCondition};
 use crate::prove::transfer::TransferType;
 use crate::prove::transfer::base_transfer::BaseTransfer;
 use crate::prove::transfer::congruent_facts::ang_object;

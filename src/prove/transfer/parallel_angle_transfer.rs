@@ -3,8 +3,8 @@ use crate::prove::condition::{Condition, ParallelCondition, SumCondition};
 use crate::prove::transfer::TransferType;
 use crate::prove::transfer::base_transfer::BaseTransfer;
 use crate::prove::transfer::parallel_facts::{
-    CollinearSet, Config, SideMap, collinear_father, collect_collinear, collect_parallel,
-    collect_sides, interior_info, match_config, points_on_line,
+    CollinearSet, Config, SideMap, collect_collinear, collect_parallel, collect_sides,
+    collinear_father, interior_info, match_config, points_on_line,
 };
 use crate::ratio::Ratio;
 
@@ -39,7 +39,9 @@ impl BaseTransfer for ParallelAngleTransfer {
         let mut candidates = Vec::new();
         for parallel in &parallels {
             for side in sides.values() {
-                let Some(cfg) = match_config(parallel, side) else { continue };
+                let Some(cfg) = match_config(parallel, side) else {
+                    continue;
+                };
                 let on_line = points_on_line(cfg.p, cfg.q, &collinear);
                 for &xt in &on_line {
                     if xt == cfg.p {
@@ -112,7 +114,11 @@ impl ParallelAngleTransfer {
 
     fn classify(&self, ip: bool, iq: bool, same: bool) -> Option<Kind> {
         let kind = if ip && iq {
-            if same { Kind::CoInterior } else { Kind::AlternateInterior }
+            if same {
+                Kind::CoInterior
+            } else {
+                Kind::AlternateInterior
+            }
         } else if ip != iq && same {
             Kind::Corresponding
         } else {

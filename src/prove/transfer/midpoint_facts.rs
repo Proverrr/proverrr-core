@@ -55,10 +55,7 @@ impl BaseTransfer for MidpointTransfer {
                     let pts = [b_.a, b_.mid, b_.b];
                     if pts.contains(&a) && pts.contains(&m) && pts.contains(&b) {
                         let condition = Condition::Midpoint(MidpointCondition::new(a, m, b));
-                        let fathers = vec![
-                            Condition::Sum(s.clone()),
-                            Condition::Between(*b_),
-                        ];
+                        let fathers = vec![Condition::Sum(s.clone()), Condition::Between(*b_)];
                         candidates.push((condition, fathers));
                     }
                 }
@@ -74,7 +71,13 @@ impl BaseTransfer for MidpointTransfer {
 }
 
 // length(a, m) = length(m, b): m halves the segment ab.
-fn halves(s: &SumCondition) -> Option<(crate::figure::Point, crate::figure::Point, crate::figure::Point)> {
+fn halves(
+    s: &SumCondition,
+) -> Option<(
+    crate::figure::Point,
+    crate::figure::Point,
+    crate::figure::Point,
+)> {
     if s.a.len() != 1 || s.b_objects.len() != 1 || !s.b_const.is_zero() {
         return None;
     }
@@ -85,7 +88,13 @@ fn halves(s: &SumCondition) -> Option<(crate::figure::Point, crate::figure::Poin
     let (p1, p2) = (x.points[0], x.points[1]);
     let (q1, q2) = (y.points[0], y.points[1]);
     for (m, a, b) in [(p1, p2, q2), (p1, p2, q1), (p2, p1, q2), (p2, p1, q1)] {
-        let other = if m == q1 { q2 } else if m == q2 { q1 } else { continue };
+        let other = if m == q1 {
+            q2
+        } else if m == q2 {
+            q1
+        } else {
+            continue;
+        };
         if a == b || a == m || b == m || other != b {
             continue;
         }

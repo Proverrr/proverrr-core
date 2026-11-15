@@ -1,5 +1,7 @@
 use crate::figure::{Figure, PanLine};
-use crate::prove::condition::{CollinearCondition, Condition, ParallelCondition, PerpendicularCondition, SumCondition};
+use crate::prove::condition::{
+    CollinearCondition, Condition, ParallelCondition, PerpendicularCondition, SumCondition,
+};
 use crate::prove::transfer::TransferType;
 use crate::prove::transfer::base_transfer::BaseTransfer;
 use crate::prove::transfer::congruent_facts::ang_object;
@@ -118,10 +120,7 @@ fn points_on_line(
 
 // Parallel(a, b) and Perpendicular(c, b): a and c are both perpendicular to
 // b, so the perpendicular pair to derive is (a, c).
-fn perp_between(
-    p: &ParallelCondition,
-    q: &PerpendicularCondition,
-) -> Option<(PanLine, PanLine)> {
+fn perp_between(p: &ParallelCondition, q: &PerpendicularCondition) -> Option<(PanLine, PanLine)> {
     if p.b == q.b {
         return Some((p.a, q.a));
     }
